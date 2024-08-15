@@ -1,13 +1,13 @@
 defmodule ExMoov.Client do
-
   def new(opts) do
     middleware = [
       {Tesla.Middleware.BaseUrl, get_base_url(opts)},
-      {Tesla.Middleware.BasicAuth, username: get_public_key(opts), password: get_secret_key(opts)},
+      {Tesla.Middleware.BasicAuth,
+       username: get_public_key(opts), password: get_secret_key(opts)},
       {Tesla.Middleware.Headers,
        [
          {"Content-Type", "application/json"},
-         {"Accept", "application/json"},
+         {"Accept", "application/json"}
        ]},
       Tesla.Middleware.JSON,
       ExMoov.Middleware.MaybeRetry
@@ -16,7 +16,7 @@ defmodule ExMoov.Client do
     Tesla.client(middleware, get_adapter(opts))
   end
 
-  #---------- private functions ----------
+  # ---------- private functions ----------
   defp get_adapter(config) do
     adapter = Map.get(config, :adapter)
 

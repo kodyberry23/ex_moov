@@ -10,6 +10,7 @@ defmodule ExMoov.Accounts do
   See Moov [Accounts](https://docs.moov.io/api/moov-accounts/accounts/) for additional info.
   """
 
+  alias ExMoov.Accounts.Account
 
   @doc """
   You can create business or individual accounts for your users (i.e., customers, merchants) by passing the required information to Moov. Requirements differ per account type and requested capabilities.
@@ -27,13 +28,14 @@ defmodule ExMoov.Accounts do
 
   To use this endpoint from the browser, you will need to specify the /accounts.write scope when generating a token.
   """
-  def create(body, client_opts) do
+  def create(body, client_opts \\ %{}) do
     body = %{
       url: "/accounts",
       method: :post,
       body: body
     }
-
-    ExMoov.request(body, client_opts)
+    body
+    |> ExMoov.request(client_opts)
+    |> ExMoov.handle_response(Account)
   end
 end

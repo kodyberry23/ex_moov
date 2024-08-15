@@ -24,7 +24,8 @@ defmodule ExMoov.MixProject do
       {:tesla, ">= 0.0.0", optional: true},
       {:hackney, ">= 0.0.0", optional: true},
       {:jason, ">= 1.0.0", optional: true},
-      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:ecto, ">= 3.0.0"}
     ]
   end
 end
