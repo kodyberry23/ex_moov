@@ -1,3 +1,20 @@
+defmodule ExMoov.Error do
+  use ExMoov.Schema
+
+  import Ecto.Changeset
+
+  embedded_schema do
+    field(:status, :integer)
+    field(:message, :string)
+  end
+
+  def map_response(params) do
+    %__MODULE__{}
+    |> cast(params, [:message, :status])
+    |> apply_changes()
+  end
+end
+
 defmodule ExMoov.InvalidPublicKeyError do
   defexception message: """
                A `:public_key` is required in order to make calls to Moov.

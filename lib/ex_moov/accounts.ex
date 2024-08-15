@@ -11,6 +11,7 @@ defmodule ExMoov.Accounts do
   """
 
   alias ExMoov.Accounts.Account
+  alias ExMoov.Accounts.Token
 
   @doc """
   You can create business or individual accounts for your users (i.e., customers, merchants) by passing the required information to Moov. Requirements differ per account type and requested capabilities.
@@ -29,13 +30,30 @@ defmodule ExMoov.Accounts do
   To use this endpoint from the browser, you will need to specify the /accounts.write scope when generating a token.
   """
   def create(body, client_opts \\ %{}) do
-    body = %{
+    params = %{
       url: "/accounts",
       method: :post,
       body: body
     }
-    body
+
+    params
     |> ExMoov.request(client_opts)
     |> ExMoov.handle_response(Account)
+  end
+
+  @doc """
+  Generates a non-expiring token that can then be used to accept Moov’s terms of service. This token can only be generated via API.
+
+  Any Moov account requesting the collect-funds, send-funds, wallet, or card-issuing capabilities must accept Moov’s terms of service,
+  then have the generated terms of service token patched to the account. Read more in Moov's docs.
+  """
+  def get_tos_token(client_opts \\ %{}) do
+    params = %{
+      url: "/tos-token"
+    }
+
+    params
+    |> ExMoov.request(client_opts)
+    |> ExMoov.handle_response(Token)
   end
 end

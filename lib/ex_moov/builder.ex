@@ -22,11 +22,12 @@ defmodule ExMoov.Builder do
   defmacro field(name, type, opts \\ []) do
     quote do
       # Initialize Ecto.Enum type if specified
-      field_type = if unquote(type) == Ecto.Enum do
-        Ecto.ParameterizedType.init(Ecto.Enum, unquote(opts))
-      else
-        unquote(type)
-      end
+      field_type =
+        if unquote(type) == Ecto.Enum do
+          Ecto.ParameterizedType.init(Ecto.Enum, unquote(opts))
+        else
+          unquote(type)
+        end
 
       @fields [{unquote(name), field_type} | @fields]
     end
@@ -36,9 +37,10 @@ defmodule ExMoov.Builder do
   defmacro __before_compile__(env) do
     objects = Module.get_attribute(env.module, :objects)
 
-    object_maps = Enum.reduce(objects, %{}, fn {name, fields}, acc ->
-      Map.put(acc, name, Enum.into(fields, %{}))
-    end)
+    object_maps =
+      Enum.reduce(objects, %{}, fn {name, fields}, acc ->
+        Map.put(acc, name, Enum.into(fields, %{}))
+      end)
 
     quote do
       # Function to return the objects map
@@ -55,19 +57,23 @@ defmodule ExMoov.Builder do
       # Helper function to expand nested objects
       defp expand_object(objects, name) do
         case Map.get(objects, name) do
-          nil -> nil
+          nil ->
+            nil
+
           fields ->
             Enum.reduce(fields, %{}, fn {field_name, field_type}, acc ->
-              expanded_type = cond do
-                is_atom(field_type) and Map.has_key?(objects, field_type) ->
-                  expand_object(objects, field_type)
+              expanded_type =
+                cond do
+                  is_atom(field_type) and Map.has_key?(objects, field_type) ->
+                    expand_object(objects, field_type)
 
-                match?({:array, _}, field_type) ->
-                  {:array, expand_object(objects, elem(field_type, 1))}
+                  match?({:array, _}, field_type) ->
+                    {:array, expand_object(objects, elem(field_type, 1))}
 
-                true ->
-                  field_type
-              end
+                  true ->
+                    field_type
+                end
+
               Map.put(acc, field_name, expanded_type)
             end)
         end
@@ -81,26 +87,26 @@ defmodule ExMoov.Builder do
 
       # Helper function to recursively build the changeset for nested objects and arrays
       defp build_changeset(types, params) do
-        types = Enum.reduce(types, %{}, fn {key, type}, types_acc ->
-          cond do
-            is_map(type) ->
-              nested_changeset = build_changeset(type, Map.get(params, to_string(key), %{}))
-              Map.put(types_acc, key, :map)
+        types =
+          Enum.reduce(types, %{}, fn {key, type}, types_acc ->
+            cond do
+              is_map(type) ->
+                nested_changeset = build_changeset(type, Map.get(params, to_string(key), %{}))
+                Map.put(types_acc, key, :map)
 
-            match?({:array, {:map, _}}, type) ->
-              Map.put(types_acc, key, type)
-
-            # match?({:array, %{}}, type) ->
-            #   IO.inspect(Map.put(types_acc, key, {:array, {:map, elem(type, 1)}}))
-
-            match?({:array, _}, type) ->
+              match?({:array, {:map, _}}, type) ->
                 Map.put(types_acc, key, type)
 
-            true ->
-              Map.put(types_acc, key, type)
+              # match?({:array, %{}}, type) ->
+              #   IO.inspect(Map.put(types_acc, key, {:array, {:map, elem(type, 1)}}))
 
-          end
-        end)
+              match?({:array, _}, type) ->
+                Map.put(types_acc, key, type)
+
+              true ->
+                Map.put(types_acc, key, type)
+            end
+          end)
 
         {%{}, types}
         |> Ecto.Changeset.cast(params, Map.keys(types))
