@@ -44,6 +44,20 @@ defmodule ExMoov do
     {:ok, module.map_response(body)}
   end
 
+  def handle_response(
+        {:ok, %Tesla.Env{status: status, body: %{"error" => error} = _body}} = _response,
+        _module
+      )
+      when status in 400..499 do
+
+    params = %{
+      status: status,
+      message: error
+    }
+
+    {:error, ExMoov.Error.map_response(params)}
+  end
+
   def handle_response({:ok, %Tesla.Env{status: status, body: body}} = _response, _module)
       when status in 400..499 do
     params = %{

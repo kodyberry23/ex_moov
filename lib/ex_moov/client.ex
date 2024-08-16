@@ -4,11 +4,7 @@ defmodule ExMoov.Client do
       {Tesla.Middleware.BaseUrl, get_base_url(opts)},
       {Tesla.Middleware.BasicAuth,
        username: get_public_key(opts), password: get_secret_key(opts)},
-      {Tesla.Middleware.Headers,
-       [
-         {"Content-Type", "application/json"},
-         {"Accept", "application/json"}
-       ]},
+      {Tesla.Middleware.Headers, get_headers(opts)},
       Tesla.Middleware.JSON,
       ExMoov.Middleware.MaybeRetry
     ]
@@ -28,6 +24,15 @@ defmodule ExMoov.Client do
     base_url = Map.get(config, :base_url)
 
     base_url || Application.get_env(:ex_moov, :base_url, "https://api.moov.io")
+  end
+
+  defp get_headers(config) do
+    headers = Map.get(config, :headers)
+
+    headers || Application.get_env(:ex_moov, :headers, [
+      {"Content-Type", "application/json"},
+      {"Accept", "application/json"}
+    ])
   end
 
   defp get_public_key(config) do

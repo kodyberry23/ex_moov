@@ -7,7 +7,7 @@ defmodule ExMoov.Accounts.Token do
     field(:token, :string)
   end
 
-  def map_resonse(params) do
+  def map_response(params) do
     %__MODULE__{}
     |> cast(params, [:token])
     |> apply_changes()
